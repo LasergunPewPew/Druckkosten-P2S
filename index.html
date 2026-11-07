@@ -49,7 +49,22 @@ details.block[open]>summary::after{content:"–"}
 details.block[open]>summary{margin-bottom:12px}
 .sumhint{font-family:var(--f-body);font-weight:400;font-size:.85rem;color:var(--muted);margin-left:auto;margin-right:8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.grid.two{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid{align-items:end}
+.inp{position:relative;display:flex;align-items:stretch}
+.inp input{padding-right:3.6em}
+.suf{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--f-mono);font-size:.78rem;color:var(--muted);pointer-events:none}
+.fils{display:flex;flex-direction:column;gap:8px}
+.frow{display:grid;grid-template-columns:44px minmax(0,1fr) 110px 120px 74px 32px;gap:8px;align-items:end;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--sunken)}
+.frow .fl{font-size:.72rem;color:var(--muted);font-weight:500;display:block;margin-bottom:3px}
+.frow input,.frow select{background:var(--surface)}
+.frow .cost{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;font-size:.9rem;padding-bottom:9px}
+.frow .del{padding-bottom:4px}
+.frow .ftype{grid-column:2 / -1;margin-top:-2px}
+.touch{display:none}
+@media (pointer:coarse){.touch{display:block}.desk{display:none}}
+.drop span{display:block}
+.mbar{display:none}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted);font-weight:500;letter-spacing:.02em;min-width:0}
 label.f .unit{font-family:var(--f-mono);font-size:.72rem}
 input,select,textarea{font:inherit;font-size:.95rem;color:var(--fg);background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
@@ -116,12 +131,36 @@ aside.result{position:sticky;top:max(12px,env(safe-area-inset-top,0px));display:
 .hitem .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hitem .p{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .empty{color:var(--muted);font-size:.85rem}
-.bmk{display:inline-block;padding:8px 14px;border-radius:6px;background:var(--accent);color:var(--accent-fg);font-weight:600;text-decoration:none;cursor:grab}
 ol.steps{margin:6px 0 0;padding-left:20px;font-size:.88rem;display:flex;flex-direction:column;gap:4px}
 code{font-family:var(--f-mono);font-size:.82em;background:var(--sunken);padding:1px 4px;border-radius:4px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:6px;font-size:.88rem;z-index:20}
 .lib-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:center}
 @media (max-width:520px){.lib-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (max-width:900px){
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .mbar{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) auto;gap:10px;align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(0,0,0,.08);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .mbar .label{display:block;font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+  .mbar span:not(.label){font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.92rem;white-space:nowrap}
+  .mbar .mb-total{font-family:var(--f-display)!important;font-weight:700;font-size:1.45rem!important;line-height:1.1}
+  .toast{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:640px){
+  input,select,textarea{font-size:16px}
+  h1{font-size:1.6rem}
+  h1 small{display:block;margin:2px 0 0}
+  .lede{font-size:.9rem}
+  .block{padding:14px}
+  .grid,.grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .frow{grid-template-columns:44px minmax(0,1fr) minmax(0,1fr) 36px;row-gap:10px;grid-template-areas:"col sel sel del" "g g p p" "type type cost cost"}
+  .frow .fcol{grid-area:col}.frow .fsel{grid-area:sel}.frow .del{grid-area:del}.frow .fg{grid-area:g}.frow .fp{grid-area:p}
+  .frow .cost{grid-area:cost;padding-bottom:0;align-self:center}.frow .ftype{grid-area:type;margin:0;align-self:center}
+  .frow .cost .fl{display:inline;margin-right:6px}
+  .big{font-size:2.2rem}
+  button,.btn{padding:10px 14px}
+  .plate{grid-template-columns:auto minmax(0,1fr);}
+  .plate .meta{grid-column:2}
+}
+@media (max-width:360px){.grid,.grid.three{grid-template-columns:minmax(0,1fr)}}
 .badge{font-family:var(--f-mono);font-size:.7rem;padding:1px 6px;border-radius:10px;background:var(--accent-soft);color:var(--accent);margin-left:6px}
 </style>
 
@@ -138,32 +177,16 @@ code{font-family:var(--f-mono);font-size:.82em;background:var(--sunken);padding:
 
   <section class="block" aria-labelledby="h-modell">
     <h2 id="h-modell">Modell</h2>
-    <div class="grid two">
-      <label class="f">Name<input id="jobName" placeholder="z. B. Kabelhalter"></label>
-      <label class="f">MakerWorld-Link <span class="unit">optional</span>
-        <input id="jobUrl" placeholder="https://makerworld.com/de/models/…"></label>
+    <label class="f">Name<input id="jobName" placeholder="z. B. Kabelhalter"></label>
+    <div class="drop" id="drop" tabindex="0" style="margin-top:12px">
+      <strong class="desk">Geslicte 3MF-Datei hier ablegen</strong><span class="desk">oder klicken zum Auswählen</span>
+      <strong class="touch">Geslicte 3MF-Datei auswählen</strong><span class="touch">aus „Dateien“, iCloud Drive oder Downloads</span>
+      <input type="file" id="file" accept=".3mf,application/vnd.ms-package.3dmanufacturing-3dmodel+xml,application/octet-stream,application/zip" hidden>
     </div>
-    <p class="hint" id="urlHint" hidden></p>
-
-    <div class="tabs" role="tablist" style="margin-top:14px">
-      <button role="tab" id="tab-3mf" aria-selected="true" aria-controls="pane-3mf">3MF-Datei importieren</button>
-      <button role="tab" id="tab-mw" aria-selected="false" aria-controls="pane-mw">MakerWorld-Daten einfügen</button>
-    </div>
-    <div id="pane-3mf" role="tabpanel">
-      <div class="drop" id="drop" tabindex="0">
-        <strong>Gesliced 3MF hier ablegen</strong>
-        oder klicken zum Auswählen
-        <input type="file" id="file" accept=".3mf" hidden>
-      </div>
-      <p class="hint">In Bambu Studio slicen, dann <b>Datei › Exportieren › Geslicte Plattendatei exportieren</b> (englisch: <i>Export plate sliced file</i>, oder „alle“ Platten). Die App liest Druckzeit, Gramm und Farben pro Platte. Alles bleibt in deinem Browser.</p>
-    </div>
-    <div id="pane-mw" role="tabpanel" hidden>
-      <textarea id="paste" placeholder="Auf der MakerWorld-Seite das Lesezeichen „Druckkosten“ anklicken, dann hier einfügen (Cmd/Strg + V)."></textarea>
-      <p class="hint">Einrichtung des Lesezeichens steht unten unter <b>MakerWorld-Lesezeichen</b>. Die Werte stammen vom Ersteller des Profils und gelten für seinen Drucker.</p>
-    </div>
+    <p class="hint">In Bambu Studio slicen, dann <b>Datei › Exportieren › Geslicte Plattendatei exportieren</b> (<i>Export plate sliced file</i>). Die Datei endet auf <code>.gcode.3mf</code>. Die App liest Druckzeit, Gramm und Farben pro Platte. Alles bleibt in deinem Browser.</p>
     <div id="importMsg"></div>
     <div class="picker" id="picker" hidden>
-      <label class="f">Druckprofil<select id="profileSel"></select></label>
+      <label class="f" id="profileWrap">Druckprofil<select id="profileSel"></select></label>
       <div>
         <div class="row" style="justify-content:space-between;margin-bottom:6px">
           <span class="sub">Platten, die du drucken willst</span>
@@ -177,28 +200,23 @@ code{font-family:var(--f-mono);font-size:.82em;background:var(--sunken);padding:
 
   <section class="block" aria-labelledby="h-druck">
     <h2 id="h-druck">Druck</h2>
-    <div class="grid">
-      <label class="f">Druckzeit <span class="unit">Stunden</span><input class="num" id="hours" inputmode="decimal"></label>
-      <label class="f">+ Minuten<input class="num" id="minutes" inputmode="decimal"></label>
-      <label class="f">Stückzahl <span class="unit">Teile pro Druck</span><input class="num" id="pieces" inputmode="numeric"></label>
+    <div class="grid three">
+      <label class="f">Druckzeit<span class="inp"><input class="num" id="hours" inputmode="decimal"><span class="suf">h</span></span></label>
+      <label class="f">+ Minuten<span class="inp"><input class="num" id="minutes" inputmode="decimal"><span class="suf">min</span></span></label>
+      <label class="f">Stückzahl <span class="unit">Teile pro Druck</span><span class="inp"><input class="num" id="pieces" inputmode="numeric"><span class="suf">Stk</span></span></label>
     </div>
     <h3 class="sub" style="margin:16px 0 6px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Filamente</h3>
-    <div class="table-wrap">
-      <table class="fil">
-        <thead><tr><th>Filament</th><th>Farbe</th><th class="r">Gramm</th><th class="r">€/kg</th><th class="r">Kosten</th><th></th></tr></thead>
-        <tbody id="filBody"></tbody>
-      </table>
-    </div>
+    <div class="fils" id="filBody"></div>
     <div class="row" style="margin-top:8px"><button id="addFil" type="button">+ Filament</button></div>
-    <p class="hint">Die Grammzahl aus Bambu Studio bzw. MakerWorld enthält schon Flush und Prime Tower. Spulenreste deckt der Schwund in den Werkstatt-Einstellungen ab.</p>
+    <p class="hint"><b>Menge</b> in Gramm laut Slicer, <b>Spulenpreis</b> in Euro pro Kilogramm. Die Grammzahl aus Bambu Studio enthält schon Flush und Prime Tower. Spulenreste deckt der Schwund in den Werkstatt-Einstellungen ab.</p>
   </section>
 
   <section class="block" aria-labelledby="h-verkauf">
     <h2 id="h-verkauf">Arbeit &amp; Verkauf</h2>
-    <div class="grid">
-      <label class="f">Arbeitszeit <span class="unit">Minuten</span><input class="num" id="laborMin" inputmode="decimal"></label>
-      <label class="f">Extras <span class="unit">€ (Magnete, Schrauben…)</span><input class="num" id="extras" inputmode="decimal"></label>
-      <label class="f">Verpackung/Versand <span class="unit">€</span><input class="num" id="shipping" inputmode="decimal"></label>
+    <div class="grid three">
+      <label class="f">Arbeitszeit <span class="unit">pro Druck</span><span class="inp"><input class="num" id="laborMin" inputmode="decimal"><span class="suf">min</span></span></label>
+      <label class="f">Extras <span class="unit">Magnete, Schrauben…</span><span class="inp"><input class="num" id="extras" inputmode="decimal"><span class="suf">€</span></span></label>
+      <label class="f">Verpackung/Versand<span class="inp"><input class="num" id="shipping" inputmode="decimal"><span class="suf">€</span></span></label>
     </div>
     <p class="hint">Arbeitszeit = Slicen, Platte abräumen, Support entfernen, Nacharbeit. Stundensatz, Marge und Steuer stellst du in den Werkstatt-Einstellungen ein.</p>
   </section>
@@ -206,15 +224,15 @@ code{font-family:var(--f-mono);font-size:.82em;background:var(--sunken);padding:
   <details class="block" id="d-settings">
     <summary>Werkstatt-Einstellungen <span class="sumhint" id="setSum"></span></summary>
     <div class="grid">
-      <label class="f">Strompreis <span class="unit">€/kWh</span><input class="num" data-set="strompreis" inputmode="decimal"></label>
-      <label class="f">Ø Leistung <span class="unit">Watt</span><input class="num" data-set="watt" inputmode="decimal"></label>
-      <label class="f">Anschaffung <span class="unit">€ Drucker + AMS</span><input class="num" data-set="anschaffung" inputmode="decimal"></label>
-      <label class="f">Lebensdauer <span class="unit">Druckstunden</span><input class="num" data-set="lebensdauer" inputmode="decimal"></label>
-      <label class="f">Verschleiß <span class="unit">€/Stunde</span><input class="num" data-set="verschleiss" inputmode="decimal"></label>
-      <label class="f">Schwund <span class="unit">% Material</span><input class="num" data-set="schwund" inputmode="decimal"></label>
-      <label class="f">Fehldruck-Aufschlag <span class="unit">%</span><input class="num" data-set="fehldruck" inputmode="decimal"></label>
-      <label class="f">Stundensatz <span class="unit">€/h Arbeit</span><input class="num" data-set="stundensatz" inputmode="decimal"></label>
-      <label class="f">Marge <span class="unit">%</span><input class="num" data-set="marge" inputmode="decimal"></label>
+      <label class="f">Strompreis<span class="inp"><input class="num" data-set="strompreis" inputmode="decimal"><span class="suf">€/kWh</span></span></label>
+      <label class="f">Ø Leistung <span class="unit">beim Drucken</span><span class="inp"><input class="num" data-set="watt" inputmode="decimal"><span class="suf">W</span></span></label>
+      <label class="f">Anschaffung <span class="unit">Drucker + AMS</span><span class="inp"><input class="num" data-set="anschaffung" inputmode="decimal"><span class="suf">€</span></span></label>
+      <label class="f">Lebensdauer <span class="unit">Druckstunden</span><span class="inp"><input class="num" data-set="lebensdauer" inputmode="decimal"><span class="suf">h</span></span></label>
+      <label class="f">Verschleiß <span class="unit">Ersatzteile</span><span class="inp"><input class="num" data-set="verschleiss" inputmode="decimal"><span class="suf">€/h</span></span></label>
+      <label class="f">Schwund <span class="unit">auf Material</span><span class="inp"><input class="num" data-set="schwund" inputmode="decimal"><span class="suf">%</span></span></label>
+      <label class="f">Fehldruck-Aufschlag<span class="inp"><input class="num" data-set="fehldruck" inputmode="decimal"><span class="suf">%</span></span></label>
+      <label class="f">Stundensatz <span class="unit">deine Arbeit</span><span class="inp"><input class="num" data-set="stundensatz" inputmode="decimal"><span class="suf">€/h</span></span></label>
+      <label class="f">Marge<span class="inp"><input class="num" data-set="marge" inputmode="decimal"><span class="suf">%</span></span></label>
       <label class="f">Umsatzsteuer
         <select data-set="mwst">
           <option value="0">keine (Kleinunternehmer)</option>
@@ -233,21 +251,6 @@ code{font-family:var(--f-mono);font-size:.82em;background:var(--sunken);padding:
     <p class="hint">Preise pro kg inklusive Versand. Beim Import wird jedem Filament der erste Eintrag mit gleichem Typ (PLA, PETG…) zugeordnet. Die Startpreise sind Beispiele.</p>
   </details>
 
-  <details class="block" id="d-bmk">
-    <summary>MakerWorld-Lesezeichen <span class="sumhint">Ein Klick holt die Modelldaten</span></summary>
-    <label class="f">Adresse deines Rechners <span class="unit">z. B. https://deinname.github.io/druckkosten/</span>
-      <input id="appUrl" placeholder="leer lassen = nur in die Zwischenablage kopieren"></label>
-    <div class="row" style="margin-top:12px">
-      <a class="bmk" id="bmkLink" href="#">Druckkosten</a>
-      <button id="copyBmk" type="button">Code kopieren</button>
-    </div>
-    <ol class="steps">
-      <li>Den blauen Knopf <b>Druckkosten</b> in deine Lesezeichenleiste ziehen. Klappt das Ziehen nicht: „Code kopieren“ und ein neues Lesezeichen mit dem Code als Adresse anlegen.</li>
-      <li>Eine MakerWorld-Modellseite öffnen und das Lesezeichen anklicken.</li>
-      <li>Ist oben eine Adresse eingetragen, öffnet sich der Rechner mit den Daten. Sonst sind sie in der Zwischenablage: Tab „MakerWorld-Daten einfügen“ wählen und einfügen.</li>
-    </ol>
-    <p class="hint">Das Lesezeichen liest nur die Seite, die du gerade offen hast. Es braucht keinen Server und kein Login. Baut MakerWorld die Seite um, kann es aufhören zu funktionieren; der 3MF-Import geht dann weiterhin.</p>
-  </details>
 
 </div>
 
@@ -274,6 +277,12 @@ code{font-family:var(--f-mono);font-size:.82em;background:var(--sunken);padding:
   </div>
 </aside>
 </div>
+</div>
+<div class="mbar" id="mbar">
+  <div class="mb-main"><span class="label">Selbstkosten</span><span class="mb-total" id="mTotal">–</span></div>
+  <div class="mb-side"><span class="label">pro Stück</span><span id="mPiece">–</span></div>
+  <div class="mb-side"><span class="label">Preis/Stk</span><span id="mPrice">–</span></div>
+  <button class="primary" id="mDetails" type="button">Details</button>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -358,50 +367,46 @@ function renderResult(){
     <div class="kv"><span>+ Marge ${n1.format(r.s.marge)} %</span><span class="v">${eur.format(r.net-r.piece)}</span></div>
     ${mw?`<div class="kv"><span>Netto</span><span class="v">${eur.format(r.net)}</span></div><div class="kv"><span>+ USt ${mw} %</span><span class="v">${eur.format(r.gross-r.net)}</span></div>`:''}
     <div class="kv total"><span>${mw?'Brutto':'Preis (ohne USt, §19 UStG)'}</span><span class="v">${eur.format(r.gross)}</span></div>`;
-  // Filament-Kosten in der Tabelle aktualisieren
+  $('#mTotal').textContent=eur.format(r.total);$('#mPiece').textContent=eur.format(r.piece);$('#mPrice').textContent=eur.format(r.gross);
+  // Filament-Kosten aktualisieren
   job.filaments.forEach(f=>{const el=document.getElementById('cost-'+f.id);if(el)el.textContent=eur.format(num(f.g)*num(f.price)/1000)});
   $('#setSum').textContent=`${eur.format(num(settings.strompreis))}/kWh · ${n1.format(num(settings.watt))} W · ${n1.format(num(settings.fehldruck))} % Fehldruck`;
   $('#libSum').textContent=`${lib.length} Filamente`;
 }
 
 /* ---------- Job-Eingaben ---------- */
-const jobFields=['jobName:name','jobUrl:url','hours','minutes','pieces','laborMin','extras','shipping'];
+const jobFields=['jobName:name','hours','minutes','pieces','laborMin','extras','shipping'];
 function bindJob(){
   jobFields.forEach(spec=>{const [id,key]=spec.split(':');const k=key||id;const el=document.getElementById(id);
-    el.addEventListener('input',()=>{job[k]=el.value;saveJob();renderResult();if(k==='url')urlHint()});});
+    el.addEventListener('input',()=>{job[k]=el.value;saveJob();renderResult()});});
 }
 function fillJob(){
   jobFields.forEach(spec=>{const [id,key]=spec.split(':');const k=key||id;const v=job[k]??'';document.getElementById(id).value=key?v:fmtIn(v)});
-  renderFil();urlHint();renderResult();
+  renderFil();renderResult();
 }
 function saveJob(){store.set('job',job)}
-function urlHint(){
-  const u=(job.url||'').trim();const el=$('#urlHint');
-  if(/makerworld\.com/i.test(u)){el.hidden=false;el.innerHTML=`<a href="${esc(u)}" target="_blank" rel="noopener">Modell auf MakerWorld öffnen</a>, dort das Lesezeichen <b>Druckkosten</b> anklicken. Eine Web-App darf MakerWorld nicht direkt abfragen, das Lesezeichen erledigt das in deinem Browser.`}
-  else el.hidden=true;
-}
 
 function libOptions(sel){return `<option value="">– frei –</option>`+lib.map(l=>`<option value="${l.id}" ${l.id===sel?'selected':''}>${esc(l.name)} · ${esc(l.type)}</option>`).join('')}
 function renderFil(){
   const tb=$('#filBody');
-  if(!job.filaments.length){tb.innerHTML=`<tr><td colspan="6" class="empty" style="padding:10px 6px">Noch kein Filament. Importiere eine 3MF-Datei oder füge eines hinzu.</td></tr>`;return}
-  tb.innerHTML=job.filaments.map(f=>`<tr data-id="${f.id}">
-    <td style="min-width:190px"><select data-k="libId" aria-label="Filament aus Bibliothek">${libOptions(f.libId)}</select>
-      ${f.libId?'':`<input data-k="name" value="${esc(f.name||'')}" placeholder="Bezeichnung" style="margin-top:4px" aria-label="Bezeichnung">`}
-      ${f.type?`<span class="sub">Typ im Modell: ${esc(f.type)}</span>`:''}</td>
-    <td><div class="colorcell"><input type="color" data-k="color" value="${esc(f.color||'#888888')}" aria-label="Farbe"></div></td>
-    <td style="width:90px"><input class="num" data-k="g" value="${esc(fmtIn(f.g))}" inputmode="decimal" aria-label="Gramm"></td>
-    <td style="width:90px"><input class="num" data-k="price" value="${esc(fmtIn(f.price))}" inputmode="decimal" aria-label="Preis pro kg"></td>
-    <td class="cost" id="cost-${f.id}"></td>
-    <td><button class="ghost" data-del="${f.id}" type="button" aria-label="Filament entfernen">✕</button></td></tr>`).join('');
+  if(!job.filaments.length){tb.innerHTML=`<p class="empty">Noch kein Filament. Importiere eine 3MF-Datei oder füge eines hinzu.</p>`;return}
+  tb.innerHTML=job.filaments.map(f=>`<div class="frow" data-id="${f.id}">
+    <label class="fcol"><span class="fl">Farbe</span><input type="color" data-k="color" value="${esc(f.color||'#888888')}"></label>
+    <label class="fsel"><span class="fl">Filament</span><select data-k="libId">${libOptions(f.libId)}</select>
+      ${f.libId?'':`<input data-k="name" value="${esc(f.name||'')}" placeholder="Bezeichnung" style="margin-top:4px" aria-label="Bezeichnung">`}</label>
+    <label class="fg"><span class="fl">Menge</span><span class="inp"><input class="num" data-k="g" value="${esc(fmtIn(f.g))}" inputmode="decimal"><span class="suf">g</span></span></label>
+    <label class="fp"><span class="fl">Spulenpreis</span><span class="inp"><input class="num" data-k="price" value="${esc(fmtIn(f.price))}" inputmode="decimal"><span class="suf">€/kg</span></span></label>
+    <div class="cost"><span class="fl">Kosten</span><span id="cost-${f.id}"></span></div>
+    <div class="del"><button class="ghost" data-del="${f.id}" type="button" aria-label="Filament entfernen">✕</button></div>
+    ${f.type?`<span class="sub ftype">Typ im Modell: ${esc(f.type)}</span>`:''}</div>`).join('');
 }
 $('#filBody').addEventListener('input',e=>{
-  const tr=e.target.closest('tr');if(!tr)return;const f=job.filaments.find(x=>x.id===tr.dataset.id);const k=e.target.dataset.k;if(!f||!k)return;
+  const tr=e.target.closest('[data-id]');if(!tr)return;const f=job.filaments.find(x=>x.id===tr.dataset.id);const k=e.target.dataset.k;if(!f||!k)return;
   f[k]=e.target.value;
   if(k==='libId'){const l=lib.find(x=>x.id===f.libId);if(l){f.price=String(l.price);f.name=l.name}renderFil()}
   saveJob();renderResult();
 });
-$('#filBody').addEventListener('click',e=>{const id=e.target.dataset&&e.target.dataset.del;if(!id)return;job.filaments=job.filaments.filter(f=>f.id!==id);saveJob();renderFil();renderResult()});
+$('#filBody').addEventListener('click',e=>{const b=e.target.closest('[data-del]');const id=b&&b.dataset.del;if(!id)return;job.filaments=job.filaments.filter(f=>f.id!==id);saveJob();renderFil();renderResult()});
 $('#addFil').addEventListener('click',()=>{const l=lib[0];job.filaments.push({id:uid(),libId:l?l.id:'',name:l?l.name:'',type:'',color:'#888888',g:'',price:l?String(l.price):'20'});saveJob();renderFil();renderResult()});
 
 /* ---------- Einstellungen ---------- */
@@ -414,7 +419,7 @@ function renderLib(){
   $('#libList').innerHTML=lib.map(l=>`<div class="lib-row" data-id="${l.id}">
     <input data-k="name" value="${esc(l.name)}" aria-label="Name">
     <input data-k="type" value="${esc(l.type)}" aria-label="Typ" placeholder="Typ">
-    <input class="num" data-k="price" value="${esc(fmtIn(l.price))}" inputmode="decimal" aria-label="€ pro kg">
+    <span class="inp"><input class="num" data-k="price" value="${esc(fmtIn(l.price))}" inputmode="decimal" aria-label="Spulenpreis in Euro pro kg"><span class="suf">€/kg</span></span>
     <button class="ghost" data-del="${l.id}" type="button" aria-label="Löschen">✕</button></div>`).join('')
     || `<p class="empty">Keine Filamente angelegt.</p>`;
 }
@@ -445,13 +450,13 @@ function setImport(data){
   ps.innerHTML=data.profiles.map((p,ix)=>`<option value="${ix}">${esc(p.title||('Profil '+(ix+1)))} · ${fmtTime(p.time)} · ${n1.format(p.weight||0)} g${p.printer?' · '+esc(p.printer):''}</option>`).join('');
   let sel=0;if(data.sel){const ix=data.profiles.findIndex(p=>p.id===data.sel||p.pid===data.sel);if(ix>=0)sel=ix}
   ps.value=String(sel);
+  $('#profileWrap').hidden=data.profiles.length<2;
   renderPlates();
   $('#picker').hidden=false;
   if(data.title&&!job.name){job.name=data.title;$('#jobName').value=data.title}
-  if(data.url){job.url=data.url;$('#jobUrl').value=data.url;urlHint()}
   saveJob();
-  const src=data.source==='3mf'?'3MF-Datei':'MakerWorld';
-  showMsg('ok',`${src}: <b>${esc(data.title||'Modell')}</b> mit ${data.profiles.length} Profil${data.profiles.length>1?'en':''} geladen. Wähle Profil und Platten und übernimm sie.`);
+  const src='3MF-Datei';
+  showMsg('ok',`${src}: <b>${esc(data.title||'Modell')}</b> mit ${data.profiles.length} Profil${data.profiles.length>1?'en':''} geladen. Wähle die Platten, die du drucken willst, und übernimm sie.`);
 }
 function curProfile(){return imported&&imported.profiles[num($('#profileSel').value)]}
 function renderPlates(){
@@ -488,29 +493,62 @@ function normColor(c){c=(c||'').trim();if(/^#[0-9a-f]{8}$/i.test(c))c=c.slice(0,
 /* ---------- 3MF-Parser ---------- */
 async function parse3mf(file){
   if(typeof JSZip==='undefined')throw new Error('Die ZIP-Bibliothek konnte nicht geladen werden. Prüfe die Internetverbindung und lade die Seite neu.');
-  const zip=await JSZip.loadAsync(file);
-  const get=async p=>{const f=zip.file(p);return f?await f.async('string'):null};
-  const sliceXml=await get('Metadata/slice_info.config');
-  const modelXml=await get('Metadata/model_settings.config');
-  let project=null;try{const pj=await get('Metadata/project_settings.config');if(pj)project=JSON.parse(pj)}catch(e){}
+  let zip;try{zip=await JSZip.loadAsync(file)}catch(e){throw new Error('Die Datei konnte nicht geöffnet werden. Ist es wirklich eine .3mf-Datei?')}
+  const paths=Object.keys(zip.files).filter(p=>!zip.files[p].dir);
+  const find=re=>paths.filter(p=>re.test(p));
+  const get=async p=>{const f=p&&zip.file(p);return f?await f.async('string'):null};
+  const attrs=str=>{const o={};str.replace(/([\w:-]+)\s*=\s*"([^"]*)"/g,(_,k,v)=>{o[k]=v});return o};
+  const metaMap=block=>{const m={};block.replace(/<metadata\b([^>]*)\/?>/g,(_,a)=>{const x=attrs(a);if(x.key!=null)m[x.key]=x.value});return m};
+  const blocks=xml=>xml?(xml.match(/<plate\b[\s\S]*?<\/plate>/g)||[]):[];
+  // Plattennamen
   const names={};
-  if(modelXml){const md=new DOMParser().parseFromString(modelXml,'application/xml');
-    md.querySelectorAll('plate').forEach(pl=>{const m={};pl.querySelectorAll(':scope > metadata').forEach(x=>m[x.getAttribute('key')]=x.getAttribute('value'));if(m.plater_id)names[m.plater_id]=m.plater_name||''});}
-  const plates=[];
-  if(sliceXml){const doc=new DOMParser().parseFromString(sliceXml,'application/xml');
-    doc.querySelectorAll('plate').forEach(pl=>{const m={};pl.querySelectorAll(':scope > metadata').forEach(x=>m[x.getAttribute('key')]=x.getAttribute('value'));
-      const time=num(m.prediction),weight=num(m.weight);if(!(time>0))return;
-      const fil=[...pl.querySelectorAll(':scope > filament')].map(f=>({t:f.getAttribute('type')||'',c:f.getAttribute('color')||'',g:num(f.getAttribute('used_g'))})).filter(f=>f.g>0);
-      const i=num(m.index)||plates.length+1;
-      plates.push({i,n:names[String(i)]?`Platte ${i}: ${names[String(i)]}`:`Platte ${i}`,time,weight:weight||fil.reduce((a,f)=>a+f.g,0),fil});});}
-  if(!plates.length)throw new Error('Diese 3MF-Datei enthält keine Slice-Daten (Druckzeit/Gewicht). Öffne sie in Bambu Studio, klicke auf „Slice“ und exportiere über <b>Datei › Exportieren › Geslicte Plattendatei exportieren</b> (<i>Export plate sliced file</i>).');
+  blocks(await get(find(/(^|\/)model_settings\.config$/i)[0])).forEach(b=>{const m=metaMap(b);if(m.plater_id)names[m.plater_id]=m.plater_name||''});
+  // Projekt-Einstellungen (Drucker, Filamentfarben/-typen)
+  let project=null;try{const pj=await get(find(/(^|\/)project_settings\.config$/i)[0]);if(pj)project=JSON.parse(pj)}catch(e){}
+  const plates=new Map();
+  // 1) slice_info.config
+  blocks(await get(find(/(^|\/)slice_info\.config$/i)[0])).forEach((b,ix)=>{
+    const m=metaMap(b);const i=num(m.index)||ix+1;
+    const fil=[...b.matchAll(/<filament\b([^>]*)\/?>/g)].map(x=>{const a=attrs(x[1]);return {t:a.type||'',c:a.color||'',g:num(a.used_g)}}).filter(f=>f.g>0);
+    const time=num(m.prediction),weight=num(m.weight)||fil.reduce((a,f)=>a+f.g,0);
+    if(time>0||weight>0)plates.set(i,{i,time,weight,fil});
+  });
+  // 2) G-Code-Kopf jeder Platte als Ergänzung/Fallback
+  const parseDur=t=>{let s=0;(t||'').replace(/(\d+(?:\.\d+)?)\s*([dhms])/g,(_,v,u)=>{s+=num(v)*({d:86400,h:3600,m:60,s:1}[u])});return s};
+  for(const gp of find(/plate_(\d+)\.gcode$/i)){
+    const i=num(gp.match(/plate_(\d+)\.gcode$/i)[1]);const cur=plates.get(i);
+    if(cur&&cur.time>0&&cur.fil.length)continue;
+    const f=zip.file(gp);let txt=await f.async('string');
+    const head=txt.slice(0,20000),tail=txt.slice(-60000);txt=null;
+    const tm=head.match(/total estimated time:\s*([^;\n]+)/i)||head.match(/estimated printing time[^=:]*[=:]\s*([^;\n]+)/i)||tail.match(/estimated printing time[^=:]*[=:]\s*([^;\n]+)/i);
+    const wm=head.match(/total filament weight \[g\]\s*:\s*([\d.,]+)/i);
+    const usedG=(tail.match(/filament used \[g\]\s*=\s*([^\n]+)/i)||[])[1];
+    const types=((tail.match(/;\s*filament_type\s*=\s*([^\n]+)/i)||[])[1]||'').split(';');
+    const cols=((tail.match(/;\s*filament_colou?r\s*=\s*([^\n]+)/i)||[])[1]||'').split(';');
+    let fil=usedG?usedG.split(',').map((g,k)=>({t:(types[k]||'').trim(),c:(cols[k]||'').trim(),g:num(g)})).filter(x=>x.g>0):[];
+    const time=tm?parseDur(tm[1]):0,weight=wm?num(wm[1]):fil.reduce((a,x)=>a+x.g,0);
+    if(cur){if(!(cur.time>0))cur.time=time;if(!cur.fil.length)cur.fil=fil;if(!(cur.weight>0))cur.weight=weight}
+    else if(time>0||weight>0)plates.set(i,{i,time,weight,fil});
+  }
+  const list=[...plates.values()].filter(p=>p.time>0||p.weight>0).sort((a,b)=>a.i-b.i);
+  if(!list.length){
+    const meta=paths.filter(p=>/^Metadata\//i.test(p)).map(p=>p.replace(/^Metadata\//i,'')).slice(0,12).join(', ');
+    const isProject=!!project&&!find(/\.gcode$/i).length;const pm=project&&project.printer_model?` (eingerichtet für <b>${esc(project.printer_model)}</b>)`:'';
+    if(isProject)throw new Error(`Das ist eine Projektdatei${pm}, die noch nicht geslict ist. Sie enthält das Modell, aber keine Druckzeit und kein Gewicht. So geht es: Datei in Bambu Studio öffnen, oben als Drucker <b>Bambu Lab P2S</b> wählen, auf <b>Slice</b> klicken und über <b>Datei › Exportieren › Geslicte Plattendatei exportieren</b> (<i>Export plate sliced file</i>) speichern. Die neue Datei endet auf <code>.gcode.3mf</code>.`);
+    throw new Error('In dieser Datei wurden keine Slice-Daten (Druckzeit/Gewicht) gefunden. Meist ist es die Projektdatei (<i>Datei › Projekt speichern</i>) statt der geslicten Datei. In Bambu Studio slicen und über <b>Datei › Exportieren › Geslicte Plattendatei exportieren</b> (<i>Export plate sliced file</i>) speichern; die Datei endet dann auf <code>.gcode.3mf</code>.'+(meta?`<br><span class="sub">Gefundene Dateien: ${esc(meta)}</span>`:''));
+  }
+  list.forEach(p=>{
+    if(!p.fil.length&&p.weight>0)p.fil=[{t:(project&&project.filament_type&&project.filament_type[0])||'PLA',c:(project&&project.filament_colour&&project.filament_colour[0])||'#888888',g:p.weight}];
+    p.n=names[String(p.i)]?`Platte ${p.i}: ${names[String(p.i)]}`:`Platte ${p.i}`;
+    if(!(p.time>0))p.n+=' (ohne Zeitangabe)';
+  });
   let printer='';if(project){printer=project.printer_model||(Array.isArray(project.printer_settings_id)?project.printer_settings_id[0]:project.printer_settings_id)||''}
   const title=file.name.replace(/\.gcode\.3mf$|\.3mf$/i,'');
-  return {source:'3mf',title,profiles:[{id:'3mf',title:'Gesliced Datei',printer,time:plates.reduce((a,p)=>a+p.time,0),weight:plates.reduce((a,p)=>a+p.weight,0),plates}]};
+  return {source:'3mf',title,profiles:[{id:'3mf',title:'Geslicte Datei',printer,time:list.reduce((a,p)=>a+p.time,0),weight:list.reduce((a,p)=>a+p.weight,0),plates:list}]};
 }
 async function handleFile(file){
   if(!file)return;showMsg('ok','Lese '+esc(file.name)+' …');
-  try{setImport(await parse3mf(file))}catch(e){showMsg('warn',e.message||String(e))}
+  try{setImport(await parse3mf(file))}catch(e){imported=null;$('#picker').hidden=true;showMsg('warn',e.message||String(e))}
 }
 const drop=$('#drop');
 drop.addEventListener('click',()=>$('#file').click());
@@ -519,48 +557,6 @@ $('#file').addEventListener('change',e=>handleFile(e.target.files[0]));
 ['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
 ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
 drop.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
-
-/* ---------- Tabs ---------- */
-function tab(which){const mw=which==='mw';$('#tab-3mf').setAttribute('aria-selected',String(!mw));$('#tab-mw').setAttribute('aria-selected',String(mw));$('#pane-3mf').hidden=mw;$('#pane-mw').hidden=!mw}
-$('#tab-3mf').addEventListener('click',()=>tab('3mf'));$('#tab-mw').addEventListener('click',()=>tab('mw'));
-
-/* ---------- MakerWorld-Daten (aus dem Lesezeichen) ---------- */
-function importMw(text){
-  text=(text||'').trim();if(!text)return;
-  let d;try{d=JSON.parse(text)}catch(e){showMsg('warn','Das sieht nicht nach Daten aus dem Lesezeichen aus. Klicke auf der MakerWorld-Seite erneut auf „Druckkosten“ und füge dann ein.');return}
-  if(d.src!=='makerworld'){showMsg('warn','Unbekanntes Datenformat.');return}
-  d.source='makerworld';setImport(d);
-}
-$('#paste').addEventListener('input',e=>importMw(e.target.value));
-
-/* ---------- Lesezeichen erzeugen ---------- */
-function bookmarkletSource(appUrl){
-  const src=function(){try{
-    var el=document.getElementById('__NEXT_DATA__');
-    if(!el||!/makerworld/.test(location.host)){alert('Bitte auf einer MakerWorld-Modellseite anklicken.');return}
-    var d=JSON.parse(el.textContent).props.pageProps.design;
-    if(!d||!d.instances){alert('Auf dieser Seite wurden keine Druckprofile gefunden.');return}
-    var mid=(location.pathname.match(/models\/(\d+)/)||[])[1];if(mid&&d.id&&String(d.id)!==mid){alert('Bitte die Seite einmal neu laden (Cmd/Strg + R) und dann erneut klicken.');return}
-    var fil=function(a){return (a||[]).map(function(f){return {t:f.type,c:f.color,g:parseFloat(f.usedG)||0}})};
-    var m=location.hash.match(/profileId-(\d+)/);
-    var out={v:1,src:'makerworld',url:location.origin+location.pathname,title:d.titleTranslated||d.title,sel:m?m[1]:null,
-      profiles:d.instances.map(function(i){var mi=(i.extention&&i.extention.modelInfo)||{};
-        return {id:String(i.id),pid:String(i.profileId),title:i.titleTranslated||i.title,printer:mi.compatibility&&mi.compatibility.devProductName,time:i.prediction,weight:i.weight,fil:fil(i.instanceFilaments),
-          plates:(mi.plates||[]).map(function(p){return {i:p.index,n:p.name,time:p.prediction,weight:p.weight,fil:fil(p.filaments)}})}})};
-    var s=JSON.stringify(out);var app='__APP__';
-    if(app){window.open(app+'#import='+encodeURIComponent(btoa(unescape(encodeURIComponent(s)))),'_blank')}
-    var msg=function(ok){if(!app)alert(ok?'Daten kopiert ('+out.profiles.length+' Druckprofil'+(out.profiles.length>1?'e':'')+'). Im Rechner unter „MakerWorld-Daten einfügen“ einfügen.':'Kopieren hat nicht geklappt. Trage im Rechner die Adresse ein, dann öffnet sich der Rechner direkt.')};
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(function(){msg(true)},function(){msg(false)})}else msg(false);
-  }catch(e){alert('Druckkosten-Lesezeichen: '+e.message)}}.toString();
-  const body=src.replace(/^function\s*\(\)\s*\{/,'').replace(/\}$/,'').replace(/\n\s*/g,'');
-  return 'javascript:'+encodeURIComponent('(function(){'+body.replace("'__APP__'",JSON.stringify(appUrl||''))+'})();');
-}
-function defaultAppUrl(){try{if(/^https?:/.test(location.protocol)&&window.self===window.top&&!/claude|anthropic/.test(location.host))return location.origin+location.pathname}catch(e){}return ''}
-function updateBmk(){const u=$('#appUrl').value.trim();store.set('appUrl',u);$('#bmkLink').setAttribute('href',bookmarkletSource(u))}
-$('#appUrl').value=store.get('appUrl',null)??defaultAppUrl();
-$('#appUrl').addEventListener('input',updateBmk);
-$('#bmkLink').addEventListener('click',e=>{e.preventDefault();toast('In die Lesezeichenleiste ziehen, nicht hier klicken')});
-$('#copyBmk').addEventListener('click',()=>copy(bookmarkletSource($('#appUrl').value.trim()),'Lesezeichen-Code kopiert'));
 
 /* ---------- Zwischenablage ---------- */
 function copy(text,ok){
@@ -578,20 +574,19 @@ $('#history').addEventListener('click',e=>{const b=e.target.closest('button');if
   if(b.dataset.load){const h=history.find(x=>x.id===b.dataset.load);if(h){job=JSON.parse(JSON.stringify(h.job));saveJob();fillJob();toast('Kalkulation geladen')}}
   if(b.dataset.hdel){history=history.filter(x=>x.id!==b.dataset.hdel);store.set('history',history);renderHistory()}});
 $('#saveJob').addEventListener('click',()=>{const r=calc();history.unshift({id:uid(),date:Date.now(),job:JSON.parse(JSON.stringify(job)),settings:{...settings},r:{total:r.total,piece:r.piece,gross:r.gross,mat:r.mat,strom:r.strom,masch:r.masch,fehl:r.fehl,arbeit:r.arbeit,extras:r.extras,grams:r.grams,hours:r.hours,pieces:r.pieces}});store.set('history',history);renderHistory();toast('Gespeichert')});
-$('#newJob').addEventListener('click',()=>{job={name:'',url:'',hours:'',minutes:'',pieces:'1',laborMin:'',extras:'',shipping:'',filaments:[]};imported=null;$('#picker').hidden=true;showMsg('','');$('#paste').value='';saveJob();fillJob()});
+$('#newJob').addEventListener('click',()=>{job={name:'',hours:'',minutes:'',pieces:'1',laborMin:'',extras:'',shipping:'',filaments:[]};imported=null;$('#picker').hidden=true;showMsg('','');saveJob();fillJob()});
 $('#copyCsv').addEventListener('click',()=>{
   const rows=history.length?history:[{date:Date.now(),job,r:calc()}];
   const d=v=>n2.format(v).replace(/\./g,'');
-  const head=['Datum','Name','Link','Gramm','Stunden','Stück','Material','Strom','Maschine','Fehldruck','Arbeit','Extras','Selbstkosten','pro Stück','Verkaufspreis/Stück'];
-  const lines=[head.join(';')].concat(rows.map(h=>[new Date(h.date).toLocaleDateString('de-DE'),'"'+(h.job.name||'').replace(/"/g,'""')+'"',h.job.url||'',d(h.r.grams),d(h.r.hours),h.r.pieces,d(h.r.mat),d(h.r.strom),d(h.r.masch),d(h.r.fehl),d(h.r.arbeit),d(h.r.extras),d(h.r.total),d(h.r.piece),d(h.r.gross)].join(';')));
+  const head=['Datum','Name','Gramm','Stunden','Stück','Material','Strom','Maschine','Fehldruck','Arbeit','Extras','Selbstkosten','pro Stück','Verkaufspreis/Stück'];
+  const lines=[head.join(';')].concat(rows.map(h=>[new Date(h.date).toLocaleDateString('de-DE'),'"'+(h.job.name||'').replace(/"/g,'""')+'"',d(h.r.grams),d(h.r.hours),h.r.pieces,d(h.r.mat),d(h.r.strom),d(h.r.masch),d(h.r.fehl),d(h.r.arbeit),d(h.r.extras),d(h.r.total),d(h.r.piece),d(h.r.gross)].join(';')));
   copy(lines.join('\n'),history.length?`${history.length} Kalkulationen als CSV kopiert`:'Aktuelle Kalkulation als CSV kopiert');
 });
 
+$('#mDetails').addEventListener('click',()=>$('.result').scrollIntoView({behavior:'smooth',block:'start'}));
 /* ---------- Start ---------- */
-bindJob();fillSettings();renderLib();fillJob();renderHistory();updateBmk();
-// Daten aus dem Lesezeichen per Adresse (#import=…)
-try{const h=location.hash;if(h.startsWith('#import=')){const s=decodeURIComponent(escape(atob(decodeURIComponent(h.slice(8)))));try{window.history.replaceState(null,'',location.pathname+location.search)}catch(e){}tab('mw');$('#paste').value=s;importMw(s)}}catch(e){showMsg('warn','Die Daten aus dem Lesezeichen konnten nicht gelesen werden.')}
-window.__dk={calc,parse3mf,bookmarkletSource,importMw,get job(){return job}};
+bindJob();fillSettings();renderLib();fillJob();renderHistory();
+window.__dk={calc,parse3mf,get job(){return job}};
 })();
 </script>
 </body>
