@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Druckkosten P2S</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+/* Layout: Werkbank-Prinzip – links Eingaben in Blöcken, rechts ein mitlaufender Kassenzettel mit dem Ergebnis */
+:root{
+  --bg:#eef1f3; --surface:#ffffff; --sunken:#f6f8f9; --fg:#162027; --muted:#5a6872; --line:#d6dde2;
+  --accent:#2347b5; --accent-fg:#ffffff; --accent-soft:#e3e9fb;
+  --c-mat:#0f8a7e; --c-strom:#d08a00; --c-masch:#6a5acd; --c-fehl:#c8463d; --c-arbeit:#3d7d2c; --c-extra:#8a97a0;
+  --warn-bg:#fff4dc; --warn-fg:#7a4b00; --ok-bg:#e2f4ec; --ok-fg:#1c5d40;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11171b; --surface:#192228; --sunken:#141b20; --fg:#e4eaee; --muted:#93a3ad; --line:#2c3a43;
+  --accent:#7d9cff; --accent-fg:#0d1530; --accent-soft:#1f2b4d;
+  --c-mat:#3cc4b4; --c-strom:#f0b43c; --c-masch:#a497ff; --c-fehl:#f07a70; --c-arbeit:#7cc565; --c-extra:#7d8b94;
+  --warn-bg:#3a2d10; --warn-fg:#f3cf86; --ok-bg:#14352a; --ok-fg:#8fdcb8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11171b; --surface:#192228; --sunken:#141b20; --fg:#e4eaee; --muted:#93a3ad; --line:#2c3a43;
+  --accent:#7d9cff; --accent-fg:#0d1530; --accent-soft:#1f2b4d;
+  --c-mat:#3cc4b4; --c-strom:#f0b43c; --c-masch:#a497ff; --c-fehl:#f07a70; --c-arbeit:#7cc565; --c-extra:#7d8b94;
+  --warn-bg:#3a2d10; --warn-fg:#f3cf86; --ok-bg:#14352a; --ok-fg:#8fdcb8; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:18px}
+h1{font-family:var(--f-display);font-weight:700;font-size:2rem;letter-spacing:.01em;margin:0;text-wrap:balance}
+h1 small{font-weight:500;color:var(--muted);font-size:.55em;letter-spacing:.06em;text-transform:uppercase;margin-left:8px}
+.lede{color:var(--muted);margin:0;max-width:60ch}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0}
+.block>h2,.block>summary{font-family:var(--f-display);font-weight:600;font-size:1.15rem;margin:0 0 12px;letter-spacing:.01em}
+details.block>summary{cursor:pointer;margin:0;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+details.block>summary::-webkit-details-marker{display:none}
+details.block>summary::after{content:"+";font-family:var(--f-mono);color:var(--muted);font-size:1.1rem}
+details.block[open]>summary::after{content:"–"}
+details.block[open]>summary{margin-bottom:12px}
+.sumhint{font-family:var(--f-body);font-weight:400;font-size:.85rem;color:var(--muted);margin-left:auto;margin-right:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted);font-weight:500;letter-spacing:.02em;min-width:0}
+label.f .unit{font-family:var(--f-mono);font-size:.72rem}
+input,select,textarea{font:inherit;font-size:.95rem;color:var(--fg);background:var(--sunken);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;min-width:0}
+input.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+textarea{font-family:var(--f-mono);font-size:.8rem;min-height:84px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input[type=color]{padding:2px;height:36px;width:44px;flex:none}
+.hint{font-size:.82rem;color:var(--muted);margin:8px 0 0}
+.hint b{color:var(--fg);font-weight:600}
+button,.btn{font:inherit;font-weight:600;font-size:.88rem;border-radius:6px;padding:7px 12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted);padding:6px 8px}
+button.ghost:hover{color:var(--c-fehl)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+.tabs button{border:none;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted);padding:8px 10px}
+.tabs button[aria-selected=true]{color:var(--fg);border-bottom-color:var(--accent)}
+.drop{border:1.5px dashed var(--line);border-radius:var(--r);padding:20px;text-align:center;color:var(--muted);background:var(--sunken);cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--fg)}
+.drop strong{color:var(--fg);display:block;font-family:var(--f-display);font-size:1.05rem;font-weight:600;margin-bottom:2px}
+.msg{border-radius:6px;padding:8px 10px;font-size:.85rem;margin-top:10px}
+.msg.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.msg.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.picker{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.plates{display:flex;flex-direction:column;gap:4px}
+.plate{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;border-radius:6px;background:var(--sunken);font-size:.88rem}
+.plate .meta{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.plate input{width:auto}
+.dots{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.dot{width:10px;height:10px;border-radius:50%;border:1px solid var(--line);display:inline-block}
+.table-wrap{overflow-x:auto}
+table.fil{width:100%;border-collapse:collapse;min-width:560px}
+table.fil th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;text-align:left;padding:0 6px 6px}
+table.fil th.r{text-align:right}
+table.fil td{padding:4px 6px;vertical-align:middle;border-top:1px solid var(--line)}
+table.fil td.cost{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;font-size:.88rem}
+table.fil td .colorcell{display:flex;gap:6px;align-items:center}
+.sub{font-size:.75rem;color:var(--muted)}
+aside.result{position:sticky;top:max(12px,env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:16px}
+@media (max-width:900px){aside.result{position:static}}
+.receipt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.receipt .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.big{font-family:var(--f-display);font-weight:700;font-size:2.6rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.bigrow{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.perpiece{text-align:right}
+.perpiece .v{font-family:var(--f-mono);font-size:1.1rem;font-weight:600;font-variant-numeric:tabular-nums}
+.bar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:14px 0 10px;background:var(--sunken)}
+.bar span{display:block;height:100%;transition:width .25s}
+@media (prefers-reduced-motion:reduce){.bar span{transition:none}}
+.lines{display:flex;flex-direction:column}
+.line{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.line:last-child{border-bottom:none}
+.line i{width:10px;height:10px;border-radius:2px;display:inline-block;transform:translateY(1px)}
+.line .d{color:var(--muted);font-size:.78rem;display:block}
+.line .v{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sale{margin-top:12px;padding-top:12px;border-top:2px solid var(--fg);display:flex;flex-direction:column;gap:4px}
+.sale .kv{display:flex;justify-content:space-between;gap:8px;font-size:.9rem}
+.sale .kv .v{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.sale .kv.total{font-weight:600;font-size:1.05rem}
+.sale .kv.total .v{color:var(--accent)}
+.history{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+.hitem{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:6px 8px;background:var(--sunken);border-radius:6px;font-size:.85rem}
+.hitem .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hitem .p{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);font-size:.85rem}
+.bmk{display:inline-block;padding:8px 14px;border-radius:6px;background:var(--accent);color:var(--accent-fg);font-weight:600;text-decoration:none;cursor:grab}
+ol.steps{margin:6px 0 0;padding-left:20px;font-size:.88rem;display:flex;flex-direction:column;gap:4px}
+code{font-family:var(--f-mono);font-size:.82em;background:var(--sunken);padding:1px 4px;border-radius:4px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:6px;font-size:.88rem;z-index:20}
+.lib-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:center}
+@media (max-width:520px){.lib-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.badge{font-family:var(--f-mono);font-size:.7rem;padding:1px 6px;border-radius:10px;background:var(--accent-soft);color:var(--accent);margin-left:6px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>Druckkosten <small>Bambu Lab P2S · AMS</small></h1>
+  <p class="lede">Was kostet ein Druck wirklich? Material, Strom, Maschine, Fehldrucke und auf Wunsch Arbeitszeit und Verkaufspreis.</p>
+</header>
+
+<div class="layout">
+<div class="col">
+
+  <section class="block" aria-labelledby="h-modell">
+    <h2 id="h-modell">Modell</h2>
+    <div class="grid two">
+      <label class="f">Name<input id="jobName" placeholder="z. B. Kabelhalter"></label>
+      <label class="f">MakerWorld-Link <span class="unit">optional</span>
+        <input id="jobUrl" placeholder="https://makerworld.com/de/models/…"></label>
+    </div>
+    <p class="hint" id="urlHint" hidden></p>
+
+    <div class="tabs" role="tablist" style="margin-top:14px">
+      <button role="tab" id="tab-3mf" aria-selected="true" aria-controls="pane-3mf">3MF-Datei importieren</button>
+      <button role="tab" id="tab-mw" aria-selected="false" aria-controls="pane-mw">MakerWorld-Daten einfügen</button>
+    </div>
+    <div id="pane-3mf" role="tabpanel">
+      <div class="drop" id="drop" tabindex="0">
+        <strong>Gesliced 3MF hier ablegen</strong>
+        oder klicken zum Auswählen
+        <input type="file" id="file" accept=".3mf" hidden>
+      </div>
+      <p class="hint">In Bambu Studio slicen, dann <b>Datei › Exportieren › Geslicte Plattendatei exportieren</b> (englisch: <i>Export plate sliced file</i>, oder „alle“ Platten). Die App liest Druckzeit, Gramm und Farben pro Platte. Alles bleibt in deinem Browser.</p>
+    </div>
+    <div id="pane-mw" role="tabpanel" hidden>
+      <textarea id="paste" placeholder="Auf der MakerWorld-Seite das Lesezeichen „Druckkosten“ anklicken, dann hier einfügen (Cmd/Strg + V)."></textarea>
+      <p class="hint">Einrichtung des Lesezeichens steht unten unter <b>MakerWorld-Lesezeichen</b>. Die Werte stammen vom Ersteller des Profils und gelten für seinen Drucker.</p>
+    </div>
+    <div id="importMsg"></div>
+    <div class="picker" id="picker" hidden>
+      <label class="f">Druckprofil<select id="profileSel"></select></label>
+      <div>
+        <div class="row" style="justify-content:space-between;margin-bottom:6px">
+          <span class="sub">Platten, die du drucken willst</span>
+          <span class="row"><button class="ghost" id="platesAll" type="button">alle</button><button class="ghost" id="platesNone" type="button">keine</button></span>
+        </div>
+        <div class="plates" id="plates"></div>
+      </div>
+      <div class="row"><button class="primary" id="applyImport" type="button">In die Kalkulation übernehmen</button><span class="sub" id="pickSum"></span></div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="h-druck">
+    <h2 id="h-druck">Druck</h2>
+    <div class="grid">
+      <label class="f">Druckzeit <span class="unit">Stunden</span><input class="num" id="hours" inputmode="decimal"></label>
+      <label class="f">+ Minuten<input class="num" id="minutes" inputmode="decimal"></label>
+      <label class="f">Stückzahl <span class="unit">Teile pro Druck</span><input class="num" id="pieces" inputmode="numeric"></label>
+    </div>
+    <h3 class="sub" style="margin:16px 0 6px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Filamente</h3>
+    <div class="table-wrap">
+      <table class="fil">
+        <thead><tr><th>Filament</th><th>Farbe</th><th class="r">Gramm</th><th class="r">€/kg</th><th class="r">Kosten</th><th></th></tr></thead>
+        <tbody id="filBody"></tbody>
+      </table>
+    </div>
+    <div class="row" style="margin-top:8px"><button id="addFil" type="button">+ Filament</button></div>
+    <p class="hint">Die Grammzahl aus Bambu Studio bzw. MakerWorld enthält schon Flush und Prime Tower. Spulenreste deckt der Schwund in den Werkstatt-Einstellungen ab.</p>
+  </section>
+
+  <section class="block" aria-labelledby="h-verkauf">
+    <h2 id="h-verkauf">Arbeit &amp; Verkauf</h2>
+    <div class="grid">
+      <label class="f">Arbeitszeit <span class="unit">Minuten</span><input class="num" id="laborMin" inputmode="decimal"></label>
+      <label class="f">Extras <span class="unit">€ (Magnete, Schrauben…)</span><input class="num" id="extras" inputmode="decimal"></label>
+      <label class="f">Verpackung/Versand <span class="unit">€</span><input class="num" id="shipping" inputmode="decimal"></label>
+    </div>
+    <p class="hint">Arbeitszeit = Slicen, Platte abräumen, Support entfernen, Nacharbeit. Stundensatz, Marge und Steuer stellst du in den Werkstatt-Einstellungen ein.</p>
+  </section>
+
+  <details class="block" id="d-settings">
+    <summary>Werkstatt-Einstellungen <span class="sumhint" id="setSum"></span></summary>
+    <div class="grid">
+      <label class="f">Strompreis <span class="unit">€/kWh</span><input class="num" data-set="strompreis" inputmode="decimal"></label>
+      <label class="f">Ø Leistung <span class="unit">Watt</span><input class="num" data-set="watt" inputmode="decimal"></label>
+      <label class="f">Anschaffung <span class="unit">€ Drucker + AMS</span><input class="num" data-set="anschaffung" inputmode="decimal"></label>
+      <label class="f">Lebensdauer <span class="unit">Druckstunden</span><input class="num" data-set="lebensdauer" inputmode="decimal"></label>
+      <label class="f">Verschleiß <span class="unit">€/Stunde</span><input class="num" data-set="verschleiss" inputmode="decimal"></label>
+      <label class="f">Schwund <span class="unit">% Material</span><input class="num" data-set="schwund" inputmode="decimal"></label>
+      <label class="f">Fehldruck-Aufschlag <span class="unit">%</span><input class="num" data-set="fehldruck" inputmode="decimal"></label>
+      <label class="f">Stundensatz <span class="unit">€/h Arbeit</span><input class="num" data-set="stundensatz" inputmode="decimal"></label>
+      <label class="f">Marge <span class="unit">%</span><input class="num" data-set="marge" inputmode="decimal"></label>
+      <label class="f">Umsatzsteuer
+        <select data-set="mwst">
+          <option value="0">keine (Kleinunternehmer)</option>
+          <option value="19">19 %</option>
+          <option value="7">7 %</option>
+        </select></label>
+    </div>
+    <p class="hint"><b>Startwerte sind Beispiele</b>, bitte mit deinen Zahlen ersetzen. Die Leistung misst du am besten einmal mit einer Messsteckdose (P2S mit PLA grob 100–200 W im Schnitt). Verschleiß: Düsen, Druckplatten, PTFE-Schlauch, Fett, grob 0,03–0,10 €/h.</p>
+    <div class="row" style="margin-top:10px"><button id="resetSettings" type="button">Startwerte wiederherstellen</button></div>
+  </details>
+
+  <details class="block" id="d-lib">
+    <summary>Filament-Bibliothek <span class="sumhint" id="libSum"></span></summary>
+    <div id="libList" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="row" style="margin-top:10px"><button id="addLib" type="button">+ Filament anlegen</button></div>
+    <p class="hint">Preise pro kg inklusive Versand. Beim Import wird jedem Filament der erste Eintrag mit gleichem Typ (PLA, PETG…) zugeordnet. Die Startpreise sind Beispiele.</p>
+  </details>
+
+  <details class="block" id="d-bmk">
+    <summary>MakerWorld-Lesezeichen <span class="sumhint">Ein Klick holt die Modelldaten</span></summary>
+    <label class="f">Adresse deines Rechners <span class="unit">z. B. https://deinname.github.io/druckkosten/</span>
+      <input id="appUrl" placeholder="leer lassen = nur in die Zwischenablage kopieren"></label>
+    <div class="row" style="margin-top:12px">
+      <a class="bmk" id="bmkLink" href="#">Druckkosten</a>
+      <button id="copyBmk" type="button">Code kopieren</button>
+    </div>
+    <ol class="steps">
+      <li>Den blauen Knopf <b>Druckkosten</b> in deine Lesezeichenleiste ziehen. Klappt das Ziehen nicht: „Code kopieren“ und ein neues Lesezeichen mit dem Code als Adresse anlegen.</li>
+      <li>Eine MakerWorld-Modellseite öffnen und das Lesezeichen anklicken.</li>
+      <li>Ist oben eine Adresse eingetragen, öffnet sich der Rechner mit den Daten. Sonst sind sie in der Zwischenablage: Tab „MakerWorld-Daten einfügen“ wählen und einfügen.</li>
+    </ol>
+    <p class="hint">Das Lesezeichen liest nur die Seite, die du gerade offen hast. Es braucht keinen Server und kein Login. Baut MakerWorld die Seite um, kann es aufhören zu funktionieren; der 3MF-Import geht dann weiterhin.</p>
+  </details>
+
+</div>
+
+<aside class="result" aria-label="Ergebnis">
+  <div class="receipt">
+    <div class="bigrow">
+      <div><div class="label">Selbstkosten gesamt</div><div class="big" id="rTotal">–</div></div>
+      <div class="perpiece"><div class="label">pro Stück</div><div class="v" id="rPiece">–</div></div>
+    </div>
+    <div class="bar" id="rBar" aria-hidden="true"></div>
+    <div class="lines" id="rLines"></div>
+    <div class="sale" id="rSale"></div>
+  </div>
+  <div class="block">
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <h2 style="margin:0;font-family:var(--f-display);font-size:1.15rem;font-weight:600">Gespeicherte Kalkulationen</h2>
+    </div>
+    <div class="row" style="margin-bottom:10px">
+      <button class="primary" id="saveJob" type="button">Speichern</button>
+      <button id="copyCsv" type="button">Als CSV kopieren</button>
+      <button id="newJob" type="button">Neu</button>
+    </div>
+    <div class="history" id="history"></div>
+  </div>
+</aside>
+</div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const eur=new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'});
+const eur3=new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',minimumFractionDigits:3,maximumFractionDigits:3});
+const n1=new Intl.NumberFormat('de-DE',{maximumFractionDigits:1});
+const n2=new Intl.NumberFormat('de-DE',{maximumFractionDigits:2});
+const num=v=>{if(v==null)return 0;const x=parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isFinite(x)?x:0};
+const fmtIn=v=>(v===''||v==null)?'':String(v).replace('.',',');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const store={get(k,d){try{const v=localStorage.getItem('dk_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('dk_'+k,JSON.stringify(v))}catch(e){}}};
+function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
+function fmtTime(sec){sec=Math.round(sec||0);const h=Math.floor(sec/3600),m=Math.round((sec%3600)/60);return h?`${h} h ${m} min`:`${m} min`}
+
+/* ---------- Standardwerte (Beispiele) ---------- */
+const DEFAULT_SETTINGS={strompreis:0.35,watt:150,anschaffung:1000,lebensdauer:5000,verschleiss:0.05,schwund:3,fehldruck:10,stundensatz:20,marge:30,mwst:'0'};
+const DEFAULT_LIB=[
+  {id:'l1',name:'Bambu PLA Basic',type:'PLA',price:20},
+  {id:'l2',name:'Bambu PLA Matte',type:'PLA',price:22},
+  {id:'l3',name:'Bambu PETG HF',type:'PETG',price:22},
+  {id:'l4',name:'Bambu ABS',type:'ABS',price:22},
+  {id:'l5',name:'Bambu ASA',type:'ASA',price:28},
+  {id:'l6',name:'Bambu TPU 95A HF',type:'TPU',price:40},
+  {id:'l7',name:'Bambu Support für PLA/PETG',type:'Support',price:70},
+  {id:'l8',name:'Fremd-PLA (günstig)',type:'PLA',price:14}
+];
+let settings=Object.assign({},DEFAULT_SETTINGS,store.get('settings',{}));
+let lib=store.get('lib',null)||DEFAULT_LIB.map(x=>({...x}));
+let history=store.get('history',[]);
+const SAMPLE_JOB={name:'Beispiel: Kabelhalter (2 Farben)',url:'',hours:'3',minutes:'0',pieces:'4',laborMin:'5',extras:'0',shipping:'0',
+  filaments:[{id:uid(),libId:'l1',name:'Bambu PLA Basic',type:'PLA',color:'#2b2b2b',g:'42',price:'20'},{id:uid(),libId:'l1',name:'Bambu PLA Basic',type:'PLA',color:'#e8e8e8',g:'8',price:'20'}]};
+let job=store.get('job',null)||JSON.parse(JSON.stringify(SAMPLE_JOB));
+
+/* ---------- Berechnung ---------- */
+function calc(){
+  const s={};for(const k in settings)s[k]=k==='mwst'?num(settings[k]):num(settings[k]);
+  const hours=num(job.hours)+num(job.minutes)/60;
+  const pieces=Math.max(1,Math.round(num(job.pieces))||1);
+  const grams=job.filaments.reduce((a,f)=>a+num(f.g),0);
+  const matRaw=job.filaments.reduce((a,f)=>a+num(f.g)*num(f.price)/1000,0);
+  const mat=matRaw*(1+s.schwund/100);
+  const kwh=hours*s.watt/1000;
+  const strom=kwh*s.strompreis;
+  const abschreibung=s.lebensdauer>0?hours*s.anschaffung/s.lebensdauer:0;
+  const verschleiss=hours*s.verschleiss;
+  const masch=abschreibung+verschleiss;
+  const base=mat+strom+masch;
+  const fehl=base*s.fehldruck/100;
+  const arbeit=num(job.laborMin)/60*s.stundensatz;
+  const extras=num(job.extras)+num(job.shipping);
+  const total=base+fehl+arbeit+extras;
+  const piece=total/pieces;
+  const net=piece*(1+s.marge/100);
+  const gross=net*(1+s.mwst/100);
+  return {s,hours,pieces,grams,matRaw,mat,kwh,strom,abschreibung,verschleiss,masch,base,fehl,arbeit,extras,total,piece,net,gross};
+}
+
+function renderResult(){
+  const r=calc();
+  $('#rTotal').textContent=eur.format(r.total);
+  $('#rPiece').textContent=eur.format(r.piece)+(r.pieces>1?` × ${r.pieces}`:'');
+  const parts=[
+    {k:'Material',c:'--c-mat',v:r.mat,d:`${n1.format(r.grams)} g inkl. ${n1.format(r.s.schwund)} % Schwund`},
+    {k:'Strom',c:'--c-strom',v:r.strom,d:`${n2.format(r.kwh)} kWh × ${eur.format(r.s.strompreis)}`},
+    {k:'Maschine',c:'--c-masch',v:r.masch,d:`Abschreibung ${eur.format(r.abschreibung)} + Verschleiß ${eur.format(r.verschleiss)}`},
+    {k:'Fehldruck-Risiko',c:'--c-fehl',v:r.fehl,d:`${n1.format(r.s.fehldruck)} % auf Material, Strom, Maschine`},
+    {k:'Arbeitszeit',c:'--c-arbeit',v:r.arbeit,d:`${n1.format(num(job.laborMin))} min × ${eur.format(r.s.stundensatz)}/h`},
+    {k:'Extras & Versand',c:'--c-extra',v:r.extras,d:'Zubehör, Verpackung'}
+  ];
+  const tot=r.total||1;
+  $('#rBar').innerHTML=parts.filter(p=>p.v>0).map(p=>`<span style="width:${(p.v/tot*100).toFixed(2)}%;background:var(${p.c})" title="${esc(p.k)}"></span>`).join('');
+  $('#rLines').innerHTML=parts.map(p=>`<div class="line"><i style="background:var(${p.c})"></i><span>${esc(p.k)}<span class="d">${esc(p.d)}</span></span><span class="v">${eur.format(p.v)}</span></div>`).join('')
+    +`<div class="line"><i></i><span class="sub">Druckzeit ${fmtTime(r.hours*3600)} · Material-Anteil ${r.total?Math.round(r.mat/r.total*100):0} %</span><span></span></div>`;
+  const mw=r.s.mwst;
+  $('#rSale').innerHTML=`<div class="label">Verkaufspreis pro Stück</div>
+    <div class="kv"><span>Selbstkosten</span><span class="v">${eur.format(r.piece)}</span></div>
+    <div class="kv"><span>+ Marge ${n1.format(r.s.marge)} %</span><span class="v">${eur.format(r.net-r.piece)}</span></div>
+    ${mw?`<div class="kv"><span>Netto</span><span class="v">${eur.format(r.net)}</span></div><div class="kv"><span>+ USt ${mw} %</span><span class="v">${eur.format(r.gross-r.net)}</span></div>`:''}
+    <div class="kv total"><span>${mw?'Brutto':'Preis (ohne USt, §19 UStG)'}</span><span class="v">${eur.format(r.gross)}</span></div>`;
+  // Filament-Kosten in der Tabelle aktualisieren
+  job.filaments.forEach(f=>{const el=document.getElementById('cost-'+f.id);if(el)el.textContent=eur.format(num(f.g)*num(f.price)/1000)});
+  $('#setSum').textContent=`${eur.format(num(settings.strompreis))}/kWh · ${n1.format(num(settings.watt))} W · ${n1.format(num(settings.fehldruck))} % Fehldruck`;
+  $('#libSum').textContent=`${lib.length} Filamente`;
+}
+
+/* ---------- Job-Eingaben ---------- */
+const jobFields=['jobName:name','jobUrl:url','hours','minutes','pieces','laborMin','extras','shipping'];
+function bindJob(){
+  jobFields.forEach(spec=>{const [id,key]=spec.split(':');const k=key||id;const el=document.getElementById(id);
+    el.addEventListener('input',()=>{job[k]=el.value;saveJob();renderResult();if(k==='url')urlHint()});});
+}
+function fillJob(){
+  jobFields.forEach(spec=>{const [id,key]=spec.split(':');const k=key||id;const v=job[k]??'';document.getElementById(id).value=key?v:fmtIn(v)});
+  renderFil();urlHint();renderResult();
+}
+function saveJob(){store.set('job',job)}
+function urlHint(){
+  const u=(job.url||'').trim();const el=$('#urlHint');
+  if(/makerworld\.com/i.test(u)){el.hidden=false;el.innerHTML=`<a href="${esc(u)}" target="_blank" rel="noopener">Modell auf MakerWorld öffnen</a>, dort das Lesezeichen <b>Druckkosten</b> anklicken. Eine Web-App darf MakerWorld nicht direkt abfragen, das Lesezeichen erledigt das in deinem Browser.`}
+  else el.hidden=true;
+}
+
+function libOptions(sel){return `<option value="">– frei –</option>`+lib.map(l=>`<option value="${l.id}" ${l.id===sel?'selected':''}>${esc(l.name)} · ${esc(l.type)}</option>`).join('')}
+function renderFil(){
+  const tb=$('#filBody');
+  if(!job.filaments.length){tb.innerHTML=`<tr><td colspan="6" class="empty" style="padding:10px 6px">Noch kein Filament. Importiere eine 3MF-Datei oder füge eines hinzu.</td></tr>`;return}
+  tb.innerHTML=job.filaments.map(f=>`<tr data-id="${f.id}">
+    <td style="min-width:190px"><select data-k="libId" aria-label="Filament aus Bibliothek">${libOptions(f.libId)}</select>
+      ${f.libId?'':`<input data-k="name" value="${esc(f.name||'')}" placeholder="Bezeichnung" style="margin-top:4px" aria-label="Bezeichnung">`}
+      ${f.type?`<span class="sub">Typ im Modell: ${esc(f.type)}</span>`:''}</td>
+    <td><div class="colorcell"><input type="color" data-k="color" value="${esc(f.color||'#888888')}" aria-label="Farbe"></div></td>
+    <td style="width:90px"><input class="num" data-k="g" value="${esc(fmtIn(f.g))}" inputmode="decimal" aria-label="Gramm"></td>
+    <td style="width:90px"><input class="num" data-k="price" value="${esc(fmtIn(f.price))}" inputmode="decimal" aria-label="Preis pro kg"></td>
+    <td class="cost" id="cost-${f.id}"></td>
+    <td><button class="ghost" data-del="${f.id}" type="button" aria-label="Filament entfernen">✕</button></td></tr>`).join('');
+}
+$('#filBody').addEventListener('input',e=>{
+  const tr=e.target.closest('tr');if(!tr)return;const f=job.filaments.find(x=>x.id===tr.dataset.id);const k=e.target.dataset.k;if(!f||!k)return;
+  f[k]=e.target.value;
+  if(k==='libId'){const l=lib.find(x=>x.id===f.libId);if(l){f.price=String(l.price);f.name=l.name}renderFil()}
+  saveJob();renderResult();
+});
+$('#filBody').addEventListener('click',e=>{const id=e.target.dataset&&e.target.dataset.del;if(!id)return;job.filaments=job.filaments.filter(f=>f.id!==id);saveJob();renderFil();renderResult()});
+$('#addFil').addEventListener('click',()=>{const l=lib[0];job.filaments.push({id:uid(),libId:l?l.id:'',name:l?l.name:'',type:'',color:'#888888',g:'',price:l?String(l.price):'20'});saveJob();renderFil();renderResult()});
+
+/* ---------- Einstellungen ---------- */
+function fillSettings(){document.querySelectorAll('[data-set]').forEach(el=>{const v=settings[el.dataset.set];el.value=el.tagName==='SELECT'?String(v):fmtIn(v)})}
+document.querySelectorAll('[data-set]').forEach(el=>el.addEventListener('input',()=>{settings[el.dataset.set]=el.value;store.set('settings',settings);renderResult()}));
+$('#resetSettings').addEventListener('click',()=>{settings={...DEFAULT_SETTINGS};store.set('settings',settings);fillSettings();renderResult();toast('Startwerte wiederhergestellt')});
+
+/* ---------- Filament-Bibliothek ---------- */
+function renderLib(){
+  $('#libList').innerHTML=lib.map(l=>`<div class="lib-row" data-id="${l.id}">
+    <input data-k="name" value="${esc(l.name)}" aria-label="Name">
+    <input data-k="type" value="${esc(l.type)}" aria-label="Typ" placeholder="Typ">
+    <input class="num" data-k="price" value="${esc(fmtIn(l.price))}" inputmode="decimal" aria-label="€ pro kg">
+    <button class="ghost" data-del="${l.id}" type="button" aria-label="Löschen">✕</button></div>`).join('')
+    || `<p class="empty">Keine Filamente angelegt.</p>`;
+}
+$('#libList').addEventListener('input',e=>{const row=e.target.closest('.lib-row');const l=lib.find(x=>x.id===row.dataset.id);l[e.target.dataset.k]=e.target.dataset.k==='price'?num(e.target.value):e.target.value;store.set('lib',lib);
+  if(e.target.dataset.k==='price'){job.filaments.forEach(f=>{if(f.libId===l.id)f.price=String(l.price)});saveJob()}
+  renderResult()});
+$('#libList').addEventListener('change',()=>renderFil());
+$('#libList').addEventListener('click',e=>{const id=e.target.dataset&&e.target.dataset.del;if(!id)return;lib=lib.filter(l=>l.id!==id);store.set('lib',lib);renderLib();renderFil();renderResult()});
+$('#addLib').addEventListener('click',()=>{lib.push({id:'l'+uid(),name:'Neues Filament',type:'PLA',price:20});store.set('lib',lib);renderLib();renderFil();renderResult()});
+function matchLib(type){
+  const t=(type||'').toUpperCase().replace(/[-\s]/g,'');
+  if(!t)return lib[0]||null;
+  return lib.find(l=>l.type.toUpperCase().replace(/[-\s]/g,'')===t)
+      || lib.find(l=>t.startsWith(l.type.toUpperCase().replace(/[-\s]/g,'')) && l.type)
+      || lib.find(l=>/SUPPORT/.test(t)&&/SUPPORT/i.test(l.type))
+      || null;
+}
+
+/* ---------- Import: gemeinsames Datenmodell ---------- */
+// imported = {source,title,url,sel,profiles:[{id,pid,title,printer,time,weight,fil:[{t,c,g}],plates:[{i,n,time,weight,fil}]}]}
+let imported=null;
+function showMsg(kind,html){$('#importMsg').innerHTML=html?`<div class="msg ${kind}">${html}</div>`:''}
+function setImport(data){
+  if(!data||!Array.isArray(data.profiles)||!data.profiles.length){showMsg('warn','In den Daten wurde kein Druckprofil gefunden.');return}
+  data.profiles.forEach(p=>{if(!p.plates||!p.plates.length)p.plates=[{i:1,n:'Gesamt',time:p.time,weight:p.weight,fil:p.fil||[]}]});
+  imported=data;
+  const ps=$('#profileSel');
+  ps.innerHTML=data.profiles.map((p,ix)=>`<option value="${ix}">${esc(p.title||('Profil '+(ix+1)))} · ${fmtTime(p.time)} · ${n1.format(p.weight||0)} g${p.printer?' · '+esc(p.printer):''}</option>`).join('');
+  let sel=0;if(data.sel){const ix=data.profiles.findIndex(p=>p.id===data.sel||p.pid===data.sel);if(ix>=0)sel=ix}
+  ps.value=String(sel);
+  renderPlates();
+  $('#picker').hidden=false;
+  if(data.title&&!job.name){job.name=data.title;$('#jobName').value=data.title}
+  if(data.url){job.url=data.url;$('#jobUrl').value=data.url;urlHint()}
+  saveJob();
+  const src=data.source==='3mf'?'3MF-Datei':'MakerWorld';
+  showMsg('ok',`${src}: <b>${esc(data.title||'Modell')}</b> mit ${data.profiles.length} Profil${data.profiles.length>1?'en':''} geladen. Wähle Profil und Platten und übernimm sie.`);
+}
+function curProfile(){return imported&&imported.profiles[num($('#profileSel').value)]}
+function renderPlates(){
+  const p=curProfile();if(!p)return;
+  $('#plates').innerHTML=p.plates.map((pl,ix)=>`<label class="plate"><input type="checkbox" data-ix="${ix}" checked>
+    <span>${esc(pl.n||('Platte '+pl.i))}<span class="dots">${(pl.fil||[]).map(f=>`<span class="dot" style="background:${esc(f.c||'#888')}" title="${esc(f.t||'')}"></span>`).join('')}</span></span>
+    <span class="meta">${fmtTime(pl.time)} · ${n1.format(pl.weight||0)} g</span></label>`).join('');
+  const printer=p.printer?` Profil erstellt für <b>${esc(p.printer)}</b>${/P2S/i.test(p.printer)?'':', auf dem P2S kann die Zeit etwas abweichen'}.`:'';
+  pickSum(printer);
+}
+function selectedPlates(){const p=curProfile();if(!p)return[];return [...document.querySelectorAll('#plates input:checked')].map(i=>p.plates[num(i.dataset.ix)])}
+function pickSum(extra){const pl=selectedPlates();const t=pl.reduce((a,x)=>a+num(x.time),0),w=pl.reduce((a,x)=>a+num(x.weight),0);
+  $('#pickSum').innerHTML=`${pl.length} Platte${pl.length===1?'':'n'} · ${fmtTime(t)} · ${n1.format(w)} g.${typeof extra==='string'?extra:(pickSum.extra||'')}`;if(typeof extra==='string')pickSum.extra=extra}
+$('#profileSel').addEventListener('change',renderPlates);
+$('#plates').addEventListener('change',()=>pickSum());
+$('#platesAll').addEventListener('click',()=>{document.querySelectorAll('#plates input').forEach(i=>i.checked=true);pickSum()});
+$('#platesNone').addEventListener('click',()=>{document.querySelectorAll('#plates input').forEach(i=>i.checked=false);pickSum()});
+$('#applyImport').addEventListener('click',()=>{
+  const pl=selectedPlates();if(!pl.length){toast('Mindestens eine Platte auswählen');return}
+  const sec=pl.reduce((a,x)=>a+num(x.time),0);
+  const agg=new Map();
+  pl.forEach(x=>(x.fil||[]).forEach(f=>{const key=(f.t||'')+'|'+normColor(f.c);const o=agg.get(key)||{t:f.t,c:f.c,g:0};o.g+=num(f.g);agg.set(key,o)}));
+  const fil=[...agg.values()].filter(f=>f.g>0);
+  // Falls keine Filament-Aufschlüsselung vorhanden: Gesamtgewicht als ein Filament
+  if(!fil.length){const w=pl.reduce((a,x)=>a+num(x.weight),0);if(w>0)fil.push({t:'PLA',c:'#888888',g:w})}
+  job.filaments=fil.map(f=>{const l=matchLib(f.t);return {id:uid(),libId:l?l.id:'',name:l?l.name:(f.t||'Filament'),type:f.t||'',color:normColor(f.c),g:String(Math.round(f.g*100)/100),price:String(l?l.price:20)}});
+  job.hours=String(Math.floor(sec/3600));job.minutes=String(Math.round((sec%3600)/60));
+  saveJob();fillJob();
+  toast('In die Kalkulation übernommen');
+  if(window.matchMedia('(max-width:900px)').matches)$('.result').scrollIntoView({behavior:'smooth'});
+});
+function normColor(c){c=(c||'').trim();if(/^#[0-9a-f]{8}$/i.test(c))c=c.slice(0,7);if(/^#[0-9a-f]{6}$/i.test(c))return c.toLowerCase();return '#888888'}
+
+/* ---------- 3MF-Parser ---------- */
+async function parse3mf(file){
+  if(typeof JSZip==='undefined')throw new Error('Die ZIP-Bibliothek konnte nicht geladen werden. Prüfe die Internetverbindung und lade die Seite neu.');
+  const zip=await JSZip.loadAsync(file);
+  const get=async p=>{const f=zip.file(p);return f?await f.async('string'):null};
+  const sliceXml=await get('Metadata/slice_info.config');
+  const modelXml=await get('Metadata/model_settings.config');
+  let project=null;try{const pj=await get('Metadata/project_settings.config');if(pj)project=JSON.parse(pj)}catch(e){}
+  const names={};
+  if(modelXml){const md=new DOMParser().parseFromString(modelXml,'application/xml');
+    md.querySelectorAll('plate').forEach(pl=>{const m={};pl.querySelectorAll(':scope > metadata').forEach(x=>m[x.getAttribute('key')]=x.getAttribute('value'));if(m.plater_id)names[m.plater_id]=m.plater_name||''});}
+  const plates=[];
+  if(sliceXml){const doc=new DOMParser().parseFromString(sliceXml,'application/xml');
+    doc.querySelectorAll('plate').forEach(pl=>{const m={};pl.querySelectorAll(':scope > metadata').forEach(x=>m[x.getAttribute('key')]=x.getAttribute('value'));
+      const time=num(m.prediction),weight=num(m.weight);if(!(time>0))return;
+      const fil=[...pl.querySelectorAll(':scope > filament')].map(f=>({t:f.getAttribute('type')||'',c:f.getAttribute('color')||'',g:num(f.getAttribute('used_g'))})).filter(f=>f.g>0);
+      const i=num(m.index)||plates.length+1;
+      plates.push({i,n:names[String(i)]?`Platte ${i}: ${names[String(i)]}`:`Platte ${i}`,time,weight:weight||fil.reduce((a,f)=>a+f.g,0),fil});});}
+  if(!plates.length)throw new Error('Diese 3MF-Datei enthält keine Slice-Daten (Druckzeit/Gewicht). Öffne sie in Bambu Studio, klicke auf „Slice“ und exportiere über <b>Datei › Exportieren › Geslicte Plattendatei exportieren</b> (<i>Export plate sliced file</i>).');
+  let printer='';if(project){printer=project.printer_model||(Array.isArray(project.printer_settings_id)?project.printer_settings_id[0]:project.printer_settings_id)||''}
+  const title=file.name.replace(/\.gcode\.3mf$|\.3mf$/i,'');
+  return {source:'3mf',title,profiles:[{id:'3mf',title:'Gesliced Datei',printer,time:plates.reduce((a,p)=>a+p.time,0),weight:plates.reduce((a,p)=>a+p.weight,0),plates}]};
+}
+async function handleFile(file){
+  if(!file)return;showMsg('ok','Lese '+esc(file.name)+' …');
+  try{setImport(await parse3mf(file))}catch(e){showMsg('warn',e.message||String(e))}
+}
+const drop=$('#drop');
+drop.addEventListener('click',()=>$('#file').click());
+drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#file').click()}});
+$('#file').addEventListener('change',e=>handleFile(e.target.files[0]));
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
+
+/* ---------- Tabs ---------- */
+function tab(which){const mw=which==='mw';$('#tab-3mf').setAttribute('aria-selected',String(!mw));$('#tab-mw').setAttribute('aria-selected',String(mw));$('#pane-3mf').hidden=mw;$('#pane-mw').hidden=!mw}
+$('#tab-3mf').addEventListener('click',()=>tab('3mf'));$('#tab-mw').addEventListener('click',()=>tab('mw'));
+
+/* ---------- MakerWorld-Daten (aus dem Lesezeichen) ---------- */
+function importMw(text){
+  text=(text||'').trim();if(!text)return;
+  let d;try{d=JSON.parse(text)}catch(e){showMsg('warn','Das sieht nicht nach Daten aus dem Lesezeichen aus. Klicke auf der MakerWorld-Seite erneut auf „Druckkosten“ und füge dann ein.');return}
+  if(d.src!=='makerworld'){showMsg('warn','Unbekanntes Datenformat.');return}
+  d.source='makerworld';setImport(d);
+}
+$('#paste').addEventListener('input',e=>importMw(e.target.value));
+
+/* ---------- Lesezeichen erzeugen ---------- */
+function bookmarkletSource(appUrl){
+  const src=function(){try{
+    var el=document.getElementById('__NEXT_DATA__');
+    if(!el||!/makerworld/.test(location.host)){alert('Bitte auf einer MakerWorld-Modellseite anklicken.');return}
+    var d=JSON.parse(el.textContent).props.pageProps.design;
+    if(!d||!d.instances){alert('Auf dieser Seite wurden keine Druckprofile gefunden.');return}
+    var mid=(location.pathname.match(/models\/(\d+)/)||[])[1];if(mid&&d.id&&String(d.id)!==mid){alert('Bitte die Seite einmal neu laden (Cmd/Strg + R) und dann erneut klicken.');return}
+    var fil=function(a){return (a||[]).map(function(f){return {t:f.type,c:f.color,g:parseFloat(f.usedG)||0}})};
+    var m=location.hash.match(/profileId-(\d+)/);
+    var out={v:1,src:'makerworld',url:location.origin+location.pathname,title:d.titleTranslated||d.title,sel:m?m[1]:null,
+      profiles:d.instances.map(function(i){var mi=(i.extention&&i.extention.modelInfo)||{};
+        return {id:String(i.id),pid:String(i.profileId),title:i.titleTranslated||i.title,printer:mi.compatibility&&mi.compatibility.devProductName,time:i.prediction,weight:i.weight,fil:fil(i.instanceFilaments),
+          plates:(mi.plates||[]).map(function(p){return {i:p.index,n:p.name,time:p.prediction,weight:p.weight,fil:fil(p.filaments)}})}})};
+    var s=JSON.stringify(out);var app='__APP__';
+    if(app){window.open(app+'#import='+encodeURIComponent(btoa(unescape(encodeURIComponent(s)))),'_blank')}
+    var msg=function(ok){if(!app)alert(ok?'Daten kopiert ('+out.profiles.length+' Druckprofil'+(out.profiles.length>1?'e':'')+'). Im Rechner unter „MakerWorld-Daten einfügen“ einfügen.':'Kopieren hat nicht geklappt. Trage im Rechner die Adresse ein, dann öffnet sich der Rechner direkt.')};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(function(){msg(true)},function(){msg(false)})}else msg(false);
+  }catch(e){alert('Druckkosten-Lesezeichen: '+e.message)}}.toString();
+  const body=src.replace(/^function\s*\(\)\s*\{/,'').replace(/\}$/,'').replace(/\n\s*/g,'');
+  return 'javascript:'+encodeURIComponent('(function(){'+body.replace("'__APP__'",JSON.stringify(appUrl||''))+'})();');
+}
+function defaultAppUrl(){try{if(/^https?:/.test(location.protocol)&&window.self===window.top&&!/claude|anthropic/.test(location.host))return location.origin+location.pathname}catch(e){}return ''}
+function updateBmk(){const u=$('#appUrl').value.trim();store.set('appUrl',u);$('#bmkLink').setAttribute('href',bookmarkletSource(u))}
+$('#appUrl').value=store.get('appUrl',null)??defaultAppUrl();
+$('#appUrl').addEventListener('input',updateBmk);
+$('#bmkLink').addEventListener('click',e=>{e.preventDefault();toast('In die Lesezeichenleiste ziehen, nicht hier klicken')});
+$('#copyBmk').addEventListener('click',()=>copy(bookmarkletSource($('#appUrl').value.trim()),'Lesezeichen-Code kopiert'));
+
+/* ---------- Zwischenablage ---------- */
+function copy(text,ok){
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();let done=false;try{done=document.execCommand('copy')}catch(e){}ta.remove();toast(done?ok:'Kopieren nicht möglich')};
+  try{navigator.clipboard.writeText(text).then(()=>toast(ok),fallback)}catch(e){fallback()}
+}
+
+/* ---------- Verlauf ---------- */
+function renderHistory(){
+  const el=$('#history');
+  if(!history.length){el.innerHTML='<p class="empty">Noch nichts gespeichert. „Speichern“ legt die aktuelle Kalkulation hier ab.</p>';return}
+  el.innerHTML=history.map(h=>`<div class="hitem" data-id="${h.id}"><button class="ghost" data-load="${h.id}" type="button" style="justify-content:flex-start;min-width:0;color:var(--fg);padding:0;text-align:left" title="Laden"><span class="n">${esc(h.job.name||'Ohne Name')}<span class="sub" style="display:block">${new Date(h.date).toLocaleDateString('de-DE')} · ${eur.format(h.r.piece)}/Stück</span></span></button><span class="p">${eur.format(h.r.total)}</span><button class="ghost" data-hdel="${h.id}" type="button" aria-label="Löschen">✕</button></div>`).join('');
+}
+$('#history').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.load){const h=history.find(x=>x.id===b.dataset.load);if(h){job=JSON.parse(JSON.stringify(h.job));saveJob();fillJob();toast('Kalkulation geladen')}}
+  if(b.dataset.hdel){history=history.filter(x=>x.id!==b.dataset.hdel);store.set('history',history);renderHistory()}});
+$('#saveJob').addEventListener('click',()=>{const r=calc();history.unshift({id:uid(),date:Date.now(),job:JSON.parse(JSON.stringify(job)),settings:{...settings},r:{total:r.total,piece:r.piece,gross:r.gross,mat:r.mat,strom:r.strom,masch:r.masch,fehl:r.fehl,arbeit:r.arbeit,extras:r.extras,grams:r.grams,hours:r.hours,pieces:r.pieces}});store.set('history',history);renderHistory();toast('Gespeichert')});
+$('#newJob').addEventListener('click',()=>{job={name:'',url:'',hours:'',minutes:'',pieces:'1',laborMin:'',extras:'',shipping:'',filaments:[]};imported=null;$('#picker').hidden=true;showMsg('','');$('#paste').value='';saveJob();fillJob()});
+$('#copyCsv').addEventListener('click',()=>{
+  const rows=history.length?history:[{date:Date.now(),job,r:calc()}];
+  const d=v=>n2.format(v).replace(/\./g,'');
+  const head=['Datum','Name','Link','Gramm','Stunden','Stück','Material','Strom','Maschine','Fehldruck','Arbeit','Extras','Selbstkosten','pro Stück','Verkaufspreis/Stück'];
+  const lines=[head.join(';')].concat(rows.map(h=>[new Date(h.date).toLocaleDateString('de-DE'),'"'+(h.job.name||'').replace(/"/g,'""')+'"',h.job.url||'',d(h.r.grams),d(h.r.hours),h.r.pieces,d(h.r.mat),d(h.r.strom),d(h.r.masch),d(h.r.fehl),d(h.r.arbeit),d(h.r.extras),d(h.r.total),d(h.r.piece),d(h.r.gross)].join(';')));
+  copy(lines.join('\n'),history.length?`${history.length} Kalkulationen als CSV kopiert`:'Aktuelle Kalkulation als CSV kopiert');
+});
+
+/* ---------- Start ---------- */
+bindJob();fillSettings();renderLib();fillJob();renderHistory();updateBmk();
+// Daten aus dem Lesezeichen per Adresse (#import=…)
+try{const h=location.hash;if(h.startsWith('#import=')){const s=decodeURIComponent(escape(atob(decodeURIComponent(h.slice(8)))));try{window.history.replaceState(null,'',location.pathname+location.search)}catch(e){}tab('mw');$('#paste').value=s;importMw(s)}}catch(e){showMsg('warn','Die Daten aus dem Lesezeichen konnten nicht gelesen werden.')}
+window.__dk={calc,parse3mf,bookmarkletSource,importMw,get job(){return job}};
+})();
+</script>
+</body>
+</html>
