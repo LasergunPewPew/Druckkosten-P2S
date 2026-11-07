@@ -7,7 +7,7 @@ Ein Kostenrechner für 3D-Drucke mit dem Bambu Lab P2S und AMS. Er läuft als ei
 - **Kalkulation:** Material, Strom, Maschine (Abschreibung + Verschleiß), Fehldruck-Risiko, Arbeitszeit, Extras
 - **Verkaufspreis:** Marge und Umsatzsteuer (19 %, 7 % oder Kleinunternehmer nach §19 UStG), Kosten pro Stück
 - **3MF-Import:** Eine geslicte Datei aus Bambu Studio ablegen; Druckzeit, Gramm und Farben pro Platte werden ausgelesen
-- **MakerWorld-Lesezeichen:** Ein Klick auf einer MakerWorld-Modellseite übernimmt alle Druckprofile mit Platten, Zeiten und Filamenten
+- **Handy-Ansicht:** Auf dem Smartphone steht das Ergebnis immer unten im Bild; 3MF-Dateien lassen sich aus „Dateien“ bzw. iCloud Drive auswählen
 - **Filament-Bibliothek** mit deinen €/kg-Preisen
 - **Gespeicherte Kalkulationen** mit CSV-Export (über die Zwischenablage, z. B. für Excel oder Numbers)
 
@@ -22,16 +22,14 @@ Ein Kostenrechner für 3D-Drucke mit dem Bambu Lab P2S und AMS. Er läuft als ei
 
 Updates: Neue `index.html` über **Add file › Upload files** hochladen. Deine Daten bleiben erhalten, weil sie im Browser gespeichert sind.
 
-## MakerWorld-Lesezeichen einrichten
+## 3MF-Datei vorbereiten
 
-1. Den Rechner auf GitHub Pages öffnen und den Bereich **MakerWorld-Lesezeichen** aufklappen. Die Adresse ist dort schon eingetragen.
-2. Den blauen Knopf **Druckkosten** in die Lesezeichenleiste ziehen (Safari: Lesezeichenleiste mit Cmd + Shift + B einblenden).
-3. Auf MakerWorld ein Modell öffnen und das Lesezeichen anklicken. Der Rechner öffnet sich in einem neuen Tab mit allen Druckprofilen des Modells.
-4. Profil und Platten wählen und **In die Kalkulation übernehmen** klicken.
+1. Modell in Bambu Studio öffnen (bei der Frage nach dem Drucker auf den P2S umstellen).
+2. **Slice plate** klicken.
+3. **Datei › Exportieren › Geslicte Plattendatei exportieren** (*Export plate sliced file*). Die Datei endet auf `.gcode.3mf`.
+4. Datei im Rechner ablegen bzw. auswählen.
 
-Warum ein Lesezeichen und kein Link-Feld? MakerWorld hat keine offizielle öffentliche Schnittstelle und blockiert Abfragen von fremden Webseiten (CORS, Cloudflare). Das Lesezeichen liest die Seite, die du gerade offen hast, direkt in deinem Browser. Baut MakerWorld die Seite um, kann es aufhören zu funktionieren; der 3MF-Import geht dann weiterhin.
-
-**Hinweis:** Die Werte auf MakerWorld kommen vom Ersteller des Profils und sind oft für einen anderen Drucker geslict (z. B. X1 Carbon). Für genaue Werte das Modell in Bambu Studio für den P2S slicen und die 3MF importieren.
+Eine normale Projektdatei (*Projekt speichern*) enthält keine Druckzeiten und wird deshalb nicht erkannt.
 
 ## So wird gerechnet
 
@@ -46,7 +44,7 @@ Pro Stück    = Selbstkosten ÷ Stückzahl
 Preis        = pro Stück × (1 + Marge %) × (1 + USt %)
 ```
 
-Die Grammzahl aus Bambu Studio und MakerWorld enthält bereits Flush und Prime Tower.
+Die Grammzahl aus Bambu Studio enthält bereits Flush und Prime Tower.
 
 ### Startwerte (Beispiele, bitte anpassen)
 
